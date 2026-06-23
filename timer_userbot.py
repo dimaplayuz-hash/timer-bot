@@ -46,9 +46,12 @@ async def countdown_timer():
     
     # Taymer boshlash
     while remaining > 0:
-        # 1 sekund kutish
-        await asyncio.sleep(1)
-        remaining -= 1
+        # 5 sekund kutish (FloodWait oldini olish uchun)
+        await asyncio.sleep(5)
+        remaining -= 5
+        
+        if remaining < 0:
+            remaining = 0
         
         # Soat, daqiqa, sekundni hisoblash
         hours = remaining // 3600
@@ -67,7 +70,23 @@ async def countdown_timer():
             await sent_message.edit_text(message_text)
             print(f"✅ Xabar edit qilindi: {hours:02d}:{minutes:02d}:{seconds:02d}")
         except Exception as e:
-            print(f"❌ Xatolik: {e}")
+            error_str = str(e)
+            if "FLOOD_WAIT" in error_str:
+                # FloodWait errorni parse qilish
+                import re
+                match = re.search(r'wait of (\d+) seconds', error_str)
+                if match:
+                    wait_time = int(match.group(1))
+                    print(f"⏳ FloodWait: {wait_time} sekund kutish...")
+                    await asyncio.sleep(wait_time)
+                    # Qayta urinish
+                    try:
+                        await sent_message.edit_text(message_text)
+                        print(f"✅ Xabar edit qilindi ( FloodWait dan keyin): {hours:02d}:{minutes:02d}:{seconds:02d}")
+                    except Exception as retry_error:
+                        print(f"❌ Qayta urinish xatolik: {retry_error}")
+            else:
+                print(f"❌ Xatolik: {e}")
     
     # Taymer tugadi - hech qanday xabar yubormaydi
     print("🎉 Taymer tugadi! 00:00:00")
