@@ -46,9 +46,9 @@ async def countdown_timer():
     
     # Taymer boshlash
     while remaining > 0:
-        # 5 sekund kutish (FloodWait oldini olish uchun)
-        await asyncio.sleep(5)
-        remaining -= 5
+        # 10 sekund kutish (FloodWait oldini olish uchun)
+        await asyncio.sleep(10)
+        remaining -= 10
         
         if remaining < 0:
             remaining = 0
